@@ -1,21 +1,40 @@
 "use client";
+import { useMemo } from "react";
+
+function seededRandom(seed: number) {
+  const x = Math.sin(seed + 1) * 10000;
+  return x - Math.floor(x);
+}
 
 export default function MagicBackground() {
+  const stars = useMemo(
+    () =>
+      Array.from({ length: 60 }, (_, i) => ({
+        width: seededRandom(i * 4) * 2 + 1,
+        height: seededRandom(i * 4 + 1) * 2 + 1,
+        top: seededRandom(i * 4 + 2) * 100,
+        left: seededRandom(i * 4 + 3) * 100,
+        animationDelay: seededRandom(i * 4 + 4) * 3,
+        animationDuration: seededRandom(i * 4 + 5) * 2 + 2,
+      })),
+    []
+  );
+
   return (
     <div className="fixed inset-0 overflow-hidden pointer-events-none z-0">
       {/* Stars */}
       <div className="absolute inset-0">
-        {[...Array(60)].map((_, i) => (
+        {stars.map((s, i) => (
           <div
             key={i}
             className="absolute rounded-full bg-white animate-glow"
             style={{
-              width: `${Math.random() * 2 + 1}px`,
-              height: `${Math.random() * 2 + 1}px`,
-              top: `${Math.random() * 100}%`,
-              left: `${Math.random() * 100}%`,
-              animationDelay: `${Math.random() * 3}s`,
-              animationDuration: `${Math.random() * 2 + 2}s`,
+              width: `${s.width}px`,
+              height: `${s.height}px`,
+              top: `${s.top}%`,
+              left: `${s.left}%`,
+              animationDelay: `${s.animationDelay}s`,
+              animationDuration: `${s.animationDuration}s`,
             }}
           />
         ))}

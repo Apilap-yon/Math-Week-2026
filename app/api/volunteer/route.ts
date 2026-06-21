@@ -9,14 +9,19 @@ export async function POST(req: NextRequest) {
     return NextResponse.json({ error: "กรุณากรอกข้อมูลให้ครบทุกช่อง" }, { status: 400 });
   }
 
-  await appendVolunteer({
-    name,
-    studentId,
-    classRoom,
-    phone: phone || "",
-    activities,
-    role,
-  });
+  try {
+    await appendVolunteer({
+      name,
+      studentId,
+      classRoom,
+      phone: phone || "",
+      activities,
+      role,
+    });
+  } catch (err) {
+    const msg = err instanceof Error ? err.message : "เกิดข้อผิดพลาดในการบันทึกข้อมูล";
+    return NextResponse.json({ error: msg }, { status: 500 });
+  }
 
   return NextResponse.json({ success: true });
 }

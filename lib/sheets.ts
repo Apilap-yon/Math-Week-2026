@@ -3,7 +3,9 @@ import { google } from "googleapis";
 const SPREADSHEET_ID = process.env.GOOGLE_SHEET_ID!;
 
 function getAuth() {
-  const credentials = JSON.parse(process.env.GOOGLE_SERVICE_ACCOUNT_KEY!);
+  const raw = process.env.GOOGLE_SERVICE_ACCOUNT_KEY;
+  if (!raw) throw new Error("GOOGLE_SERVICE_ACCOUNT_KEY is not set in .env.local");
+  const credentials = JSON.parse(raw);
   return new google.auth.GoogleAuth({
     credentials,
     scopes: ["https://www.googleapis.com/auth/spreadsheets"],
@@ -31,6 +33,7 @@ export async function appendRegistration(data: {
       timestamp,
       data.competitionId,
       data.competitionName,
+      "", // Email (ไม่มีระบบ login)
       data.teamName || "",
       data.members[0]?.name || "",
       data.members[0]?.studentId || "",
@@ -48,6 +51,7 @@ export async function appendRegistration(data: {
         timestamp,
         data.competitionId,
         data.competitionName,
+        "", // Email (ไม่มีระบบ login)
         member.name,
         member.studentId,
         member.classRoom,
@@ -86,6 +90,7 @@ export async function appendVolunteer(data: {
       values: [
         [
           timestamp,
+          "", // Email (ไม่มีระบบ login)
           data.name,
           data.studentId,
           data.classRoom,
