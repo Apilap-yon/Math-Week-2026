@@ -1,5 +1,4 @@
 "use client";
-import { useSession, signIn } from "next-auth/react";
 import { useParams, useRouter } from "next/navigation";
 import { useEffect, useState } from "react";
 import Link from "next/link";
@@ -14,20 +13,15 @@ interface Member {
 }
 
 export default function CompetitionPage() {
-  const { data: session, status } = useSession();
   const params = useParams();
   const router = useRouter();
   const id = params.id as string;
 
   const competition = getCompetition(id);
+  const memberCount = competition?.isTeam ? competition.teamSize || 3 : 1;
+
   const [members, setMembers] = useState<Member[]>(
-    competition?.isTeam
-      ? [
-          { name: "", studentId: "", classRoom: "" },
-          { name: "", studentId: "", classRoom: "" },
-          { name: "", studentId: "", classRoom: "" },
-        ]
-      : [{ name: "", studentId: "", classRoom: "" }]
+    Array.from({ length: memberCount }, () => ({ name: "", studentId: "", classRoom: "" }))
   );
   const [teamName, setTeamName] = useState("");
   const [loading, setLoading] = useState(false);
@@ -51,7 +45,6 @@ export default function CompetitionPage() {
   if (!competition) return null;
 
   const isFull = registered >= competition.quota;
-  const memberCount = competition.isTeam ? competition.teamSize || 3 : 1;
 
   const updateMember = (index: number, field: keyof Member, value: string) => {
     setMembers((prev) =>
@@ -61,11 +54,6 @@ export default function CompetitionPage() {
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
-    if (!session) {
-      signIn("google");
-      return;
-    }
-
     setLoading(true);
     setError("");
 
@@ -92,16 +80,6 @@ export default function CompetitionPage() {
       setLoading(false);
     }
   };
-
-  if (status === "loading") {
-    return (
-      <>
-        <MagicBackground />
-        <Navbar />
-        <div className="relative z-10 pt-32 text-center text-gray-400">กำลังโหลด...</div>
-      </>
-    );
-  }
 
   return (
     <>
@@ -155,18 +133,7 @@ export default function CompetitionPage() {
           )}
         </div>
 
-        {/* Form */}
-        {!session ? (
-          <div className="magic-card rounded-2xl p-8 text-center">
-            <p className="text-gray-400 mb-4">กรุณาเข้าสู่ระบบด้วยบัญชี @lsp.ac.th เพื่อสมัคร</p>
-            <button
-              onClick={() => signIn("google")}
-              className={`bg-gradient-to-r ${competition.color} text-white font-semibold px-8 py-3 rounded-xl hover:opacity-90 transition-all`}
-            >
-              เข้าสู่ระบบเพื่อสมัคร
-            </button>
-          </div>
-        ) : isFull ? (
+        {isFull ? (
           <div className="magic-card rounded-2xl p-8 text-center">
             <p className="text-gray-400">การแข่งขันนี้รับผู้สมัครครบแล้ว</p>
           </div>
@@ -191,7 +158,7 @@ export default function CompetitionPage() {
               )}
 
               {Array.from({ length: memberCount }).map((_, i) => (
-                <div key={i} className={`${i > 0 ? "mt-6 pt-6 border-t border-purple-900/40" : ""}`}>
+                <div key={i} className={i > 0 ? "mt-6 pt-6 border-t border-purple-900/40" : ""}>
                   {competition.isTeam && (
                     <h3 className="text-purple-400 font-semibold text-sm mb-4">
                       สมาชิกคนที่ {i + 1}
@@ -242,11 +209,6 @@ export default function CompetitionPage() {
                   </div>
                 </div>
               ))}
-            </div>
-
-            <div className="magic-card rounded-xl p-4 text-sm text-gray-400">
-              <p>📧 บัญชีที่ใช้ลงทะเบียน: <span className="text-purple-300">{session.user?.email}</span></p>
-              <p className="mt-1 text-xs">* ข้อมูลจะถูกบันทึกใน Google Sheets ของกิจกรรม</p>
             </div>
 
             {error && (

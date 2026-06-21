@@ -13,7 +13,6 @@ function getAuth() {
 export async function appendRegistration(data: {
   competitionId: string;
   competitionName: string;
-  email: string;
   members: Array<{ name: string; studentId: string; classRoom: string }>;
   isTeam: boolean;
   teamName?: string;
@@ -28,12 +27,10 @@ export async function appendRegistration(data: {
   const rows: string[][] = [];
 
   if (data.isTeam) {
-    // One row per team
     rows.push([
       timestamp,
       data.competitionId,
       data.competitionName,
-      data.email,
       data.teamName || "",
       data.members[0]?.name || "",
       data.members[0]?.studentId || "",
@@ -46,13 +43,11 @@ export async function appendRegistration(data: {
       data.members[2]?.classRoom || "",
     ]);
   } else {
-    // One row per person
     for (const member of data.members) {
       rows.push([
         timestamp,
         data.competitionId,
         data.competitionName,
-        data.email,
         member.name,
         member.studentId,
         member.classRoom,
@@ -69,7 +64,6 @@ export async function appendRegistration(data: {
 }
 
 export async function appendVolunteer(data: {
-  email: string;
   name: string;
   studentId: string;
   classRoom: string;
@@ -92,7 +86,6 @@ export async function appendVolunteer(data: {
       values: [
         [
           timestamp,
-          data.email,
           data.name,
           data.studentId,
           data.classRoom,
@@ -116,7 +109,6 @@ export async function getRegistrationCount(competitionId: string): Promise<numbe
     });
 
     const values = res.data.values || [];
-    // Skip header row, count rows matching competitionId
     return values.slice(1).filter((row) => row[0] === competitionId).length;
   } catch {
     return 0;

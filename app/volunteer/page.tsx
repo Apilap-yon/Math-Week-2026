@@ -1,5 +1,4 @@
 "use client";
-import { useSession, signIn } from "next-auth/react";
 import { useState } from "react";
 import { useRouter } from "next/navigation";
 import Link from "next/link";
@@ -26,7 +25,6 @@ const ROLES = [
 ];
 
 export default function VolunteerPage() {
-  const { data: session, status } = useSession();
   const router = useRouter();
 
   const [form, setForm] = useState({
@@ -48,7 +46,6 @@ export default function VolunteerPage() {
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
-    if (!session) return signIn("google");
     if (!activities.length) {
       setError("กรุณาเลือกกิจกรรมอย่างน้อย 1 รายการ");
       return;
@@ -77,16 +74,6 @@ export default function VolunteerPage() {
     }
   };
 
-  if (status === "loading") {
-    return (
-      <>
-        <MagicBackground />
-        <Navbar />
-        <div className="relative z-10 pt-32 text-center text-gray-400">กำลังโหลด...</div>
-      </>
-    );
-  }
-
   return (
     <>
       <MagicBackground />
@@ -107,171 +94,153 @@ export default function VolunteerPage() {
           </div>
         </div>
 
-        {!session ? (
-          <div className="magic-card rounded-2xl p-8 text-center">
-            <p className="text-gray-400 mb-4">กรุณาเข้าสู่ระบบด้วยบัญชี @lsp.ac.th เพื่อสมัครจิตอาสา</p>
-            <button
-              onClick={() => signIn("google")}
-              className="bg-gradient-to-r from-emerald-600 to-teal-700 text-white font-semibold px-8 py-3 rounded-xl hover:opacity-90 transition-all"
-            >
-              เข้าสู่ระบบเพื่อสมัคร
-            </button>
-          </div>
-        ) : (
-          <form onSubmit={handleSubmit} className="space-y-6">
-            {/* Personal info */}
-            <div className="magic-card rounded-2xl p-6">
-              <h2 className="text-white font-bold text-lg mb-5">ข้อมูลส่วนตัว</h2>
-              <div className="space-y-4">
+        <form onSubmit={handleSubmit} className="space-y-6">
+          {/* Personal info */}
+          <div className="magic-card rounded-2xl p-6">
+            <h2 className="text-white font-bold text-lg mb-5">ข้อมูลส่วนตัว</h2>
+            <div className="space-y-4">
+              <div>
+                <label className="block text-sm text-gray-400 mb-1.5">
+                  ชื่อ-นามสกุล <span className="text-red-400">*</span>
+                </label>
+                <input
+                  type="text"
+                  value={form.name}
+                  onChange={(e) => setForm({ ...form, name: e.target.value })}
+                  placeholder="เช่น สมหญิง รักเรียน"
+                  required
+                  className="magic-input w-full px-4 py-2.5 rounded-xl text-sm"
+                />
+              </div>
+              <div className="grid grid-cols-2 gap-4">
                 <div>
                   <label className="block text-sm text-gray-400 mb-1.5">
-                    ชื่อ-นามสกุล <span className="text-red-400">*</span>
+                    เลขประจำตัว <span className="text-red-400">*</span>
                   </label>
                   <input
                     type="text"
-                    value={form.name}
-                    onChange={(e) => setForm({ ...form, name: e.target.value })}
-                    placeholder="เช่น สมหญิง รักเรียน"
+                    value={form.studentId}
+                    onChange={(e) => setForm({ ...form, studentId: e.target.value })}
+                    placeholder="เช่น 12345"
                     required
                     className="magic-input w-full px-4 py-2.5 rounded-xl text-sm"
                   />
                 </div>
-                <div className="grid grid-cols-2 gap-4">
-                  <div>
-                    <label className="block text-sm text-gray-400 mb-1.5">
-                      เลขประจำตัว <span className="text-red-400">*</span>
-                    </label>
-                    <input
-                      type="text"
-                      value={form.studentId}
-                      onChange={(e) => setForm({ ...form, studentId: e.target.value })}
-                      placeholder="เช่น 12345"
-                      required
-                      className="magic-input w-full px-4 py-2.5 rounded-xl text-sm"
-                    />
-                  </div>
-                  <div>
-                    <label className="block text-sm text-gray-400 mb-1.5">
-                      ชั้น/ห้อง <span className="text-red-400">*</span>
-                    </label>
-                    <input
-                      type="text"
-                      value={form.classRoom}
-                      onChange={(e) => setForm({ ...form, classRoom: e.target.value })}
-                      placeholder="เช่น ม.5/1"
-                      required
-                      className="magic-input w-full px-4 py-2.5 rounded-xl text-sm"
-                    />
-                  </div>
-                </div>
                 <div>
-                  <label className="block text-sm text-gray-400 mb-1.5">เบอร์โทรศัพท์</label>
+                  <label className="block text-sm text-gray-400 mb-1.5">
+                    ชั้น/ห้อง <span className="text-red-400">*</span>
+                  </label>
                   <input
-                    type="tel"
-                    value={form.phone}
-                    onChange={(e) => setForm({ ...form, phone: e.target.value })}
-                    placeholder="เช่น 08x-xxx-xxxx"
+                    type="text"
+                    value={form.classRoom}
+                    onChange={(e) => setForm({ ...form, classRoom: e.target.value })}
+                    placeholder="เช่น ม.5/1"
+                    required
                     className="magic-input w-full px-4 py-2.5 rounded-xl text-sm"
                   />
                 </div>
               </div>
-            </div>
-
-            {/* Activities */}
-            <div className="magic-card rounded-2xl p-6">
-              <h2 className="text-white font-bold text-lg mb-1">
-                กิจกรรมที่ต้องการเป็นจิตอาสา <span className="text-red-400">*</span>
-              </h2>
-              <p className="text-gray-500 text-xs mb-4">เลือกได้มากกว่า 1 รายการ</p>
-              <div className="grid grid-cols-1 gap-2">
-                {ACTIVITIES.map((act) => (
-                  <label
-                    key={act.id}
-                    className={`flex items-center gap-3 p-3 rounded-xl cursor-pointer transition-all border ${
-                      activities.includes(act.id)
-                        ? "bg-emerald-900/30 border-emerald-600/60 text-emerald-300"
-                        : "border-purple-900/40 text-gray-400 hover:border-purple-700/60 hover:text-white"
-                    }`}
-                  >
-                    <input
-                      type="checkbox"
-                      checked={activities.includes(act.id)}
-                      onChange={() => toggleActivity(act.id)}
-                      className="hidden"
-                    />
-                    <span className={`w-5 h-5 rounded-md border-2 flex items-center justify-center shrink-0 transition-all ${
-                      activities.includes(act.id)
-                        ? "bg-emerald-600 border-emerald-600"
-                        : "border-gray-600"
-                    }`}>
-                      {activities.includes(act.id) && (
-                        <svg className="w-3 h-3 text-white" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={3}>
-                          <path strokeLinecap="round" strokeLinejoin="round" d="M5 13l4 4L19 7" />
-                        </svg>
-                      )}
-                    </span>
-                    <span className="text-sm">{act.label}</span>
-                  </label>
-                ))}
+              <div>
+                <label className="block text-sm text-gray-400 mb-1.5">เบอร์โทรศัพท์</label>
+                <input
+                  type="tel"
+                  value={form.phone}
+                  onChange={(e) => setForm({ ...form, phone: e.target.value })}
+                  placeholder="เช่น 08x-xxx-xxxx"
+                  className="magic-input w-full px-4 py-2.5 rounded-xl text-sm"
+                />
               </div>
             </div>
+          </div>
 
-            {/* Role */}
-            <div className="magic-card rounded-2xl p-6">
-              <h2 className="text-white font-bold text-lg mb-4">
-                บทบาทที่ต้องการ <span className="text-red-400">*</span>
-              </h2>
-              <div className="grid grid-cols-1 gap-2">
-                {ROLES.map((role) => (
-                  <label
-                    key={role}
-                    className={`flex items-center gap-3 p-3 rounded-xl cursor-pointer transition-all border ${
-                      form.role === role
-                        ? "bg-purple-900/30 border-purple-600/60 text-purple-300"
-                        : "border-purple-900/40 text-gray-400 hover:border-purple-700/60 hover:text-white"
-                    }`}
-                  >
-                    <input
-                      type="radio"
-                      name="role"
-                      value={role}
-                      checked={form.role === role}
-                      onChange={(e) => setForm({ ...form, role: e.target.value })}
-                      className="hidden"
-                      required
-                    />
-                    <span className={`w-5 h-5 rounded-full border-2 flex items-center justify-center shrink-0 transition-all ${
-                      form.role === role ? "border-purple-500" : "border-gray-600"
-                    }`}>
-                      {form.role === role && (
-                        <span className="w-2.5 h-2.5 rounded-full bg-purple-500 block" />
-                      )}
-                    </span>
-                    <span className="text-sm">{role}</span>
-                  </label>
-                ))}
-              </div>
+          {/* Activities */}
+          <div className="magic-card rounded-2xl p-6">
+            <h2 className="text-white font-bold text-lg mb-1">
+              กิจกรรมที่ต้องการเป็นจิตอาสา <span className="text-red-400">*</span>
+            </h2>
+            <p className="text-gray-500 text-xs mb-4">เลือกได้มากกว่า 1 รายการ</p>
+            <div className="grid grid-cols-1 gap-2">
+              {ACTIVITIES.map((act) => (
+                <label
+                  key={act.id}
+                  className={`flex items-center gap-3 p-3 rounded-xl cursor-pointer transition-all border ${
+                    activities.includes(act.id)
+                      ? "bg-emerald-900/30 border-emerald-600/60 text-emerald-300"
+                      : "border-purple-900/40 text-gray-400 hover:border-purple-700/60 hover:text-white"
+                  }`}
+                >
+                  <input
+                    type="checkbox"
+                    checked={activities.includes(act.id)}
+                    onChange={() => toggleActivity(act.id)}
+                    className="hidden"
+                  />
+                  <span className={`w-5 h-5 rounded-md border-2 flex items-center justify-center shrink-0 transition-all ${
+                    activities.includes(act.id) ? "bg-emerald-600 border-emerald-600" : "border-gray-600"
+                  }`}>
+                    {activities.includes(act.id) && (
+                      <svg className="w-3 h-3 text-white" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={3}>
+                        <path strokeLinecap="round" strokeLinejoin="round" d="M5 13l4 4L19 7" />
+                      </svg>
+                    )}
+                  </span>
+                  <span className="text-sm">{act.label}</span>
+                </label>
+              ))}
             </div>
+          </div>
 
-            <div className="magic-card rounded-xl p-4 text-sm text-gray-400">
-              <p>📧 บัญชีที่ใช้ลงทะเบียน: <span className="text-purple-300">{session.user?.email}</span></p>
+          {/* Role */}
+          <div className="magic-card rounded-2xl p-6">
+            <h2 className="text-white font-bold text-lg mb-4">
+              บทบาทที่ต้องการ <span className="text-red-400">*</span>
+            </h2>
+            <div className="grid grid-cols-1 gap-2">
+              {ROLES.map((role) => (
+                <label
+                  key={role}
+                  className={`flex items-center gap-3 p-3 rounded-xl cursor-pointer transition-all border ${
+                    form.role === role
+                      ? "bg-purple-900/30 border-purple-600/60 text-purple-300"
+                      : "border-purple-900/40 text-gray-400 hover:border-purple-700/60 hover:text-white"
+                  }`}
+                >
+                  <input
+                    type="radio"
+                    name="role"
+                    value={role}
+                    checked={form.role === role}
+                    onChange={(e) => setForm({ ...form, role: e.target.value })}
+                    className="hidden"
+                    required
+                  />
+                  <span className={`w-5 h-5 rounded-full border-2 flex items-center justify-center shrink-0 transition-all ${
+                    form.role === role ? "border-purple-500" : "border-gray-600"
+                  }`}>
+                    {form.role === role && (
+                      <span className="w-2.5 h-2.5 rounded-full bg-purple-500 block" />
+                    )}
+                  </span>
+                  <span className="text-sm">{role}</span>
+                </label>
+              ))}
             </div>
+          </div>
 
-            {error && (
-              <div className="bg-red-900/30 border border-red-800/50 text-red-400 rounded-xl p-4 text-sm">
-                ❌ {error}
-              </div>
-            )}
+          {error && (
+            <div className="bg-red-900/30 border border-red-800/50 text-red-400 rounded-xl p-4 text-sm">
+              ❌ {error}
+            </div>
+          )}
 
-            <button
-              type="submit"
-              disabled={loading}
-              className="w-full py-3.5 rounded-xl font-bold text-white transition-all bg-gradient-to-r from-emerald-600 to-teal-700 hover:opacity-90 disabled:opacity-50 disabled:cursor-not-allowed shadow-lg text-base"
-            >
-              {loading ? "กำลังส่งข้อมูล..." : "✅ ยืนยันการสมัครจิตอาสา"}
-            </button>
-          </form>
-        )}
+          <button
+            type="submit"
+            disabled={loading}
+            className="w-full py-3.5 rounded-xl font-bold text-white transition-all bg-gradient-to-r from-emerald-600 to-teal-700 hover:opacity-90 disabled:opacity-50 disabled:cursor-not-allowed shadow-lg text-base"
+          >
+            {loading ? "กำลังส่งข้อมูล..." : "✅ ยืนยันการสมัครจิตอาสา"}
+          </button>
+        </form>
       </main>
     </>
   );
