@@ -34,13 +34,18 @@ export async function POST(req: NextRequest) {
     }
   }
 
-  await appendRegistration({
-    competitionId,
-    competitionName: `${competition.name} ${competition.level}`,
-    members,
-    isTeam: competition.isTeam,
-    teamName,
-  });
+  try {
+    await appendRegistration({
+      competitionId,
+      competitionName: `${competition.name} ${competition.level}`,
+      members,
+      isTeam: competition.isTeam,
+      teamName,
+    });
+  } catch (err) {
+    const msg = err instanceof Error ? err.message : "เกิดข้อผิดพลาดในการบันทึกข้อมูล";
+    return NextResponse.json({ error: msg }, { status: 500 });
+  }
 
   return NextResponse.json({ success: true });
 }
