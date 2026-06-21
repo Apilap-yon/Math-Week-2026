@@ -31,6 +31,7 @@ export async function appendRegistration(data: {
       timestamp,
       data.competitionId,
       data.competitionName,
+      "", // Email (ไม่มีระบบ login)
       data.teamName || "",
       data.members[0]?.name || "",
       data.members[0]?.studentId || "",
@@ -48,6 +49,7 @@ export async function appendRegistration(data: {
         timestamp,
         data.competitionId,
         data.competitionName,
+        "", // Email (ไม่มีระบบ login)
         member.name,
         member.studentId,
         member.classRoom,
@@ -86,6 +88,7 @@ export async function appendVolunteer(data: {
       values: [
         [
           timestamp,
+          "", // Email (ไม่มีระบบ login)
           data.name,
           data.studentId,
           data.classRoom,
